@@ -35,8 +35,8 @@ app.post("/chat", async (req, res) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          inputs: userMessage,
-        }),
+          inputs: userMessage
+        })
       }
     );
 
@@ -45,13 +45,13 @@ app.post("/chat", async (req, res) => {
     let data;
     try {
       data = JSON.parse(text);
-    } catch {
+    } catch (e) {
       return res.json({ reply: text });
     }
 
     if (Array.isArray(data)) {
       return res.json({
-        reply: data[0]?.generated_text || "No response",
+        reply: data[0]?.generated_text || "No response"
       });
     }
 
@@ -59,7 +59,7 @@ app.post("/chat", async (req, res) => {
 
   } catch (error) {
     console.error("ERROR:", error);
-    res.status(500).json({ reply: "API request failed." });
+    return res.status(500).json({ reply: "API request failed." });
   }
 });
 
