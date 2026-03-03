@@ -27,31 +27,38 @@ app.post("/chat", async (req, res) => {
 
   try {
     const response = await fetch(
-      "https://router.huggingface.co/hf-inference/models/google/flan-t5-large",
-     {
-       method: "POST",
-       headers: {
-        Authorization: `Bearer ${process.env.HF_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        inputs: userMessage,
-      }),
+      "https://api-inference.huggingface.co/models/google/flan-t5-large",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.HF_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          inputs: userMessage,
+        }),
+      }
+    );
+
+    const text = await response.text();
+
+    try {
+      const data = JSON.parse(text);
+
+      if (Array.isArray(data)) {
+        return res.json({
+          reply: data[0]?.generated_text || "No response",
+        });
+      }
+
+      return res.json({ reply: JSON.stringify(data) });
+
+    } catch {
+      return res.json({ reply: text });
     }
-   ;
-
-    const data = await response.json();
-
-    if (data.error) {
-      return res.json({ reply: `⚠️ ${data.error}` });
-    }
-
-    res.json({
-      reply: data[0]?.generated_text || "No response from model.",
-    });
 
   } catch (error) {
-    console.error(error);
+    console.error("ERROR:", error);
     res.status(500).json({ reply: "API request failed." });
   }
 });
